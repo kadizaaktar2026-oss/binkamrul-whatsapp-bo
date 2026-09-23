@@ -3,9 +3,11 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const app = express();
 app.use(bodyParser.json());
+
 const VERIFY_TOKEN = "binkamrul123";
 const PHONE_NUMBER_ID = "1323997887462900";
-const ACCESS_TOKEN = "[STRIPPED 96 bytes]";
+const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
+
 app.get('/webhook', (req, res) => {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
@@ -16,13 +18,14 @@ app.get('/webhook', (req, res) => {
     res.sendStatus(403);
   }
 });
+
 app.post('/webhook', async (req, res) => {
   const entry = req.body.entry?.[0]?.changes?.[0]?.value;
   const message = entry?.messages?.[0];
   if (message) {
     const from = message.from;
     const text = message.text?.body || "";
-    const reply = `Wa Alaikum Assalam! Ami active achi! Apni bolechen: ${text}`;
+    const reply = `Wa Alaikum Assalam Mahmud vai! Ami active achi! Apni bolechen: ${text}`;
     try {
       await axios.post(`https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
         { messaging_product: "whatsapp", to: from, text: { body: reply } },
@@ -32,6 +35,7 @@ app.post('/webhook', async (req, res) => {
   }
   res.sendStatus(200);
 });
+
 app.get('/', (req,res) => res.send('Binkamrul Bot is Running'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Running on ${PORT}`));
